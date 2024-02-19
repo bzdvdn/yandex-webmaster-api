@@ -5,14 +5,16 @@ from yandex_webmaster import __version__
 
 
 def read(f):
-    return open(f, "r", encoding='utf-8').read()
+    return open(f, "r", encoding="utf-8").read()
 
 
 setup(
     name="yandex-webmaster-api",
     version=__version__,
     packages=find_packages(exclude=("tests",)),
-    install_requires=["requests",],
+    install_requires=[
+        "requests",
+    ],
     description="wrapper for yandex webmaster api",
     author="bzdvdn",
     author_email="bzdv.dn@gmail.com",

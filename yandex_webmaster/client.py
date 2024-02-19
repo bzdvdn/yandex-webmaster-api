@@ -7,7 +7,7 @@ from .errors import YandexWebmasterError
 
 
 class YandexWebmaster(object):
-    API_URL = 'https://api.webmaster.yandex.net/v4/'
+    API_URL = "https://api.webmaster.yandex.net/v4/"
 
     def __init__(self, access_token: str):
         self.set_access_token(access_token)
@@ -18,25 +18,25 @@ class YandexWebmaster(object):
         self, http_method: str, endpoint: str, params: Optional[dict] = None
     ) -> dict:
         method = getattr(self._session, http_method)
-        url = f'{self.API_URL}{endpoint}'
-        if http_method == 'post':
+        url = f"{self.API_URL}{endpoint}"
+        if http_method == "post":
             response = method(url, json=params)
         else:
             if params:
-                url = f'{url}?{urlencode(params)}'
+                url = f"{url}?{urlencode(params)}"
             response = method(url)
         if response.status_code == 204:
             return {}
         json_response = response.json()
         if response.status_code > 399:
             raise YandexWebmasterError(
-                json_response['error_message'], json_response['error_code']
+                json_response["error_message"], json_response["error_code"]
             )
         return json_response
 
     def get_user_id(self) -> dict:
-        response = self._send_api_request('get', 'user')
-        return response['user_id']
+        response = self._send_api_request("get", "user")
+        return response["user_id"]
 
     def get_hosts(self) -> list:
         """return user hosts
@@ -55,8 +55,8 @@ class YandexWebmaster(object):
             }
             }]
         """
-        response = self._send_api_request('get', f'user/{self.user_id}/hosts')
-        return response['hosts']
+        response = self._send_api_request("get", f"user/{self.user_id}/hosts")
+        return response["hosts"]
 
     def get_popular_search_queries(
         self,
@@ -64,8 +64,8 @@ class YandexWebmaster(object):
         date_from: datetime,
         date_to: datetime,
         query_indicator: str,
-        order_by: str = 'TOTAL_SHOWS',
-        device_type_indicator: Optional[str] = 'ALL',
+        order_by: str = "TOTAL_SHOWS",
+        device_type_indicator: Optional[str] = "ALL",
         limit: int = 500,
         offset: int = 0,
     ) -> dict:
@@ -84,18 +84,18 @@ class YandexWebmaster(object):
         Returns:
             dict: [description]
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/search-queries/popular'
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/search-queries/popular"
         params = {
-            'order_by': order_by,
-            'date_from': date_from.strftime('%Y-%m-%d'),
-            'date_to': date_to.strftime('%Y-%m-%d'),
-            'limit': limit,
-            'offset': offset,
-            'device_type_indicator': device_type_indicator,
+            "order_by": order_by,
+            "date_from": date_from.strftime("%Y-%m-%d"),
+            "date_to": date_to.strftime("%Y-%m-%d"),
+            "limit": limit,
+            "offset": offset,
+            "device_type_indicator": device_type_indicator,
         }
         if query_indicator is not None:
-            params['query_indicator'] = query_indicator
-        response = self._send_api_request('get', endpoint, params)
+            params["query_indicator"] = query_indicator
+        response = self._send_api_request("get", endpoint, params)
         return response
 
     def get_search_query_all_history(
@@ -129,17 +129,17 @@ class YandexWebmaster(object):
                 }
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/search-queries/all/history'
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/search-queries/all/history"
         params = {}
         if date_from is not None:
-            params['date_from'] = date_from.strftime('%Y-%m-%d')
+            params["date_from"] = date_from.strftime("%Y-%m-%d")
         if date_to is not None:
-            params['date_to'] = date_to.strftime('%Y-%m-%d')
+            params["date_to"] = date_to.strftime("%Y-%m-%d")
         if query_indicator is not None:
-            params['query_indicator'] = query_indicator
+            params["query_indicator"] = query_indicator
         if device_type_indicator is not None:
-            params['device_type_indicator'] = device_type_indicator
-        response = self._send_api_request('get', endpoint, params)
+            params["device_type_indicator"] = device_type_indicator
+        response = self._send_api_request("get", endpoint, params)
         return response
 
     def get_single_search_query_history(
@@ -175,21 +175,94 @@ class YandexWebmaster(object):
                             ...
                         ]
                     }
-                }  
+                }
         """
         endpoint = (
-            f'user/{self.user_id}/hosts/{host_id}/search-queries/{query_id}/history'
+            f"user/{self.user_id}/hosts/{host_id}/search-queries/{query_id}/history"
         )
         params = {}
         if date_from is not None:
-            params['date_from'] = date_from.strftime('%Y-%m-%d')
+            params["date_from"] = date_from.strftime("%Y-%m-%d")
         if date_to is not None:
-            params['date_to'] = date_to.strftime('%Y-%m-%d')
+            params["date_to"] = date_to.strftime("%Y-%m-%d")
         if query_indicator is not None:
-            params['query_indicator'] = query_indicator
+            params["query_indicator"] = query_indicator
         if device_type_indicator is not None:
-            params['device_type_indicator'] = device_type_indicator
-        response = self._send_api_request('get', endpoint, params)
+            params["device_type_indicator"] = device_type_indicator
+        response = self._send_api_request("get", endpoint, params)
+        return response
+
+    def get_list_query_analytics(
+        self,
+        host_id: str,
+        device_type_indicator: str = "ALL",
+        text_indicator: str = "URL",
+        limit: int = 20,
+        offset: int = 0,
+        region_ids: Optional[list] = None,
+        filters: Optional[dict] = None,
+        sort_by_date: Optional[dict] = None,
+    ) -> dict:
+        """list query analytics
+        DOC: https://yandex.ru/dev/webmaster/doc/dg/reference/host-query-analytics.html
+
+        Args:
+            host_id (str): host id
+            device_type_indicator (str, optional): device indictator. Defaults to "ALL".
+            text_indicator (str, optional): text inditactor. Defaults to "URL".
+            limit (int, optional): limit page. Defaults to 20.
+            offset (int, optional): offset page. Defaults to 0.
+            region_ids (Optional[list], optional): regions. Defaults to None.
+            filters (Optional[dict], optional): filters. Defaults to None.
+            sort_by_date (Optional[dict], optional): sort data. Defaults to None.
+
+        Returns:
+            dict: {
+                "count": 5175,
+                "text_indicator_to_statistics": [
+                    {
+                        "text_indicator": {
+                            "type": "URL",
+                            "value": "some text"
+                        },
+                        "statistics": [
+                            {
+                                "date": "2023-04-15",
+                                "field": "CLICKS",
+                                "value": 7.0
+                            },
+                            {
+                                "date": "2023-04-15",
+                                "field": "POSITION",
+                                "value": 4.0
+                            },
+                            {
+                                "date": "2023-04-15",
+                                "field": "IMPRESSIONS",
+                                "value": 8595.0
+                            },
+                            {
+                                "date": "2023-04-15",
+                                "field": "CTR",
+                                "value": 0.0
+                            },
+                        ...
+                        }
+        """
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/query-analytics/list"
+        data = {
+            "limit": limit,
+            "offset": offset,
+            "device_type_indicator": device_type_indicator,
+            "text_indicator": text_indicator,
+        }
+        if region_ids:
+            data["region_ids"] = region_ids
+        if filters:
+            data["filters"] = filters
+        if sort_by_date:
+            data["sort_by_date"] = sort_by_date
+        response = self._send_api_request("post", endpoint=endpoint, params=data)
         return response
 
     def get_host(self, host_id: str) -> dict:
@@ -214,8 +287,8 @@ class YandexWebmaster(object):
                 "host_display_name": "Ya.ru"
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}'
-        response = self._send_api_request('get', endpoint)
+        endpoint = f"user/{self.user_id}/hosts/{host_id}"
+        response = self._send_api_request("get", endpoint)
         return response
 
     def get_sqi_history(
@@ -243,11 +316,11 @@ class YandexWebmaster(object):
         """
         params = {}
         if date_from is not None:
-            params['date_from'] = date_from.strftime('%Y-%m-%d')
+            params["date_from"] = date_from.strftime("%Y-%m-%d")
         if date_to is not None:
-            params['date_to'] = date_to.strftime('%Y-%m-%d')
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/sqi-history'
-        response = self._send_api_request('get', endpoint, params)
+            params["date_to"] = date_to.strftime("%Y-%m-%d")
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/sqi-history"
+        response = self._send_api_request("get", endpoint, params)
         return response
 
     def add_host(self, host_url: str) -> dict:
@@ -261,9 +334,9 @@ class YandexWebmaster(object):
                 "host_url": "http://example.com"
             }
         """
-        params = {'host_url': host_url}
-        endpoint = f'user/{self.user_id}/hosts'
-        response = self._send_api_request('post', endpoint, params)
+        params = {"host_url": host_url}
+        endpoint = f"user/{self.user_id}/hosts"
+        response = self._send_api_request("post", endpoint, params)
         return response
 
     def delete_host(self, host_id: str) -> dict:
@@ -275,8 +348,8 @@ class YandexWebmaster(object):
         Returns:
             dict: {}
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}'
-        response = self._send_api_request('delete', endpoint)
+        endpoint = f"user/{self.user_id}/hosts/{host_id}"
+        response = self._send_api_request("delete", endpoint)
         return response
 
     def get_sitemaps(
@@ -312,13 +385,13 @@ class YandexWebmaster(object):
             ]
         }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/sitemaps'
-        params = {'limit': limit}
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/sitemaps"
+        params = {"limit": limit}
         if parent_id:
-            params['parent_id'] = parent_id
+            params["parent_id"] = parent_id  # type: ignore
         if from_site_id:
-            params['from'] = from_site_id
-        response = self._send_api_request('get', endpoint, params=params)
+            params["from"] = from_site_id  # type: ignore
+        response = self._send_api_request("get", endpoint, params=params)
         return response
 
     def get_sitemap(self, host_id: str, sitemap_id: str) -> dict:
@@ -342,9 +415,9 @@ class YandexWebmaster(object):
                 "sitemap_type": "SITEMAP"
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/sitemaps'
-        params = {'sitemap_id': sitemap_id}
-        response = self._send_api_request('get', endpoint, params)
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/sitemaps"
+        params = {"sitemap_id": sitemap_id}
+        response = self._send_api_request("get", endpoint, params)
         return response
 
     def get_user_added_sitemaps(
@@ -369,11 +442,11 @@ class YandexWebmaster(object):
                 "count": 1
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/user-added-sitemaps'
-        params = {'limit': limit}
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/user-added-sitemaps"
+        params = {"limit": limit}
         if offset:
-            params['offset'] = offset
-        response = self._send_api_request('get', endpoint, params)
+            params["offset"] = offset  # type: ignore
+        response = self._send_api_request("get", endpoint, params)
         return response
 
     def get_user_added_sitemap(self, host_id: str, sitemap_id: str) -> dict:
@@ -391,9 +464,9 @@ class YandexWebmaster(object):
             }
         """
         endpoint = (
-            f'user/{self.user_id}/hosts/{host_id}/user-added-sitemaps/{sitemap_id}'
+            f"user/{self.user_id}/hosts/{host_id}/user-added-sitemaps/{sitemap_id}"
         )
-        response = self._send_api_request('get', endpoint)
+        response = self._send_api_request("get", endpoint)
         return response
 
     def add_sitemap(self, host_id: str, url: str) -> dict:
@@ -408,9 +481,9 @@ class YandexWebmaster(object):
                 "sitemap_id": "c7-fe:80-c0"
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/user-added-sitemaps'
-        params = {'url': url}
-        response = self._send_api_request('post', endpoint, params)
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/user-added-sitemaps"
+        params = {"url": url}
+        response = self._send_api_request("post", endpoint, params)
         return response
 
     def delete_sitemap(self, host_id: str, sitemap_id: str) -> dict:
@@ -421,12 +494,12 @@ class YandexWebmaster(object):
             sitemap_id (str): id of sitemap
 
         Returns:
-            dict: 
+            dict:
         """
         endpoint = (
-            f'user/{self.user_id}/hosts/{host_id}/user-added-sitemaps/{sitemap_id}'
+            f"user/{self.user_id}/hosts/{host_id}/user-added-sitemaps/{sitemap_id}"
         )
-        response = self._send_api_request('delete', endpoint)
+        response = self._send_api_request("delete", endpoint)
         return response
 
     def get_indexing_stats(self, host_id: str) -> dict:
@@ -445,8 +518,8 @@ class YandexWebmaster(object):
                 }
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/summary'
-        response = self._send_api_request('get', endpoint)
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/summary"
+        response = self._send_api_request("get", endpoint)
         return response
 
     def get_indexing_history(
@@ -471,12 +544,12 @@ class YandexWebmaster(object):
                 }
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/indexing/history'
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/indexing/history"
         params = {
-            'date_from': date_from.strftime('%Y-%m-%d'),
-            'date_to': date_to.strftime('%Y-%m-%d'),
+            "date_from": date_from.strftime("%Y-%m-%d"),
+            "date_to": date_to.strftime("%Y-%m-%d"),
         }
-        response = self._send_api_request('get', endpoint, params)
+        response = self._send_api_request("get", endpoint, params)
         return response
 
     def get_indexing_samples(
@@ -502,12 +575,12 @@ class YandexWebmaster(object):
                 ]
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/indexing/samples'
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/indexing/samples"
         params = {
-            'limit': limit,
-            'offset': offset,
+            "limit": limit,
+            "offset": offset,
         }
-        response = self._send_api_request('get', endpoint, params)
+        response = self._send_api_request("get", endpoint, params)
         return response
 
     def get_monitoring_important_urls(self, host_id: str) -> dict:
@@ -541,8 +614,8 @@ class YandexWebmaster(object):
                 ]
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/important-urls'
-        response = self._send_api_request('get', endpoint)
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/important-urls"
+        response = self._send_api_request("get", endpoint)
         return response
 
     def get_important_url_history(self, host_id: str, url: str) -> dict:
@@ -577,9 +650,9 @@ class YandexWebmaster(object):
                 ]
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/important-urls'
-        params = {'url': url}
-        response = self._send_api_request('get', endpoint, params)
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/important-urls"
+        params = {"url": url}
+        response = self._send_api_request("get", endpoint, params)
         return response
 
     def get_insearch_url_history(
@@ -602,12 +675,12 @@ class YandexWebmaster(object):
                 ]
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/search-urls/in-search/history'
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/search-urls/in-search/history"
         params = {
-            'date_from': date_from.strftime('%Y-%m-%d'),
-            'date_to': date_to.strftime('%Y-%m-%d'),
+            "date_from": date_from.strftime("%Y-%m-%d"),
+            "date_to": date_to.strftime("%Y-%m-%d"),
         }
-        response = self._send_api_request('get', endpoint, params)
+        response = self._send_api_request("get", endpoint, params)
         return response
 
     def get_insearch_url_samples(
@@ -632,12 +705,12 @@ class YandexWebmaster(object):
                 ]
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/search-urls/in-search/samples'
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/search-urls/in-search/samples"
         params = {
-            'limit': limit,
-            'offset': offset,
+            "limit": limit,
+            "offset": offset,
         }
-        response = self._send_api_request('get', endpoint, params)
+        response = self._send_api_request("get", endpoint, params)
         return response
 
     def get_insearch_url_events_history(
@@ -662,12 +735,12 @@ class YandexWebmaster(object):
                 ]
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/search-urls/events/history'
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/search-urls/events/history"
         params = {
-            'date_from': date_from.strftime('%Y-%m-%d'),
-            'date_to': date_to.strftime('%Y-%m-%d'),
+            "date_from": date_from.strftime("%Y-%m-%d"),
+            "date_to": date_to.strftime("%Y-%m-%d"),
         }
-        response = self._send_api_request('get', endpoint, params)
+        response = self._send_api_request("get", endpoint, params)
         return response
 
     def get_insearch_url_events_samples(
@@ -692,12 +765,12 @@ class YandexWebmaster(object):
                 ]
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/search-urls/events/samples'
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/search-urls/events/samples"
         params = {
-            'limit': limit,
-            'offset': offset,
+            "limit": limit,
+            "offset": offset,
         }
-        response = self._send_api_request('get', endpoint, params)
+        response = self._send_api_request("get", endpoint, params)
         return response
 
     def recrawl_url(self, host_id: str, url: str) -> dict:
@@ -713,11 +786,11 @@ class YandexWebmaster(object):
                 "quota_remainder": 1
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/recrawl/queue'
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/recrawl/queue"
         params = {
-            'url': url,
+            "url": url,
         }
-        response = self._send_api_request('post', endpoint, params)
+        response = self._send_api_request("post", endpoint, params)
         return response
 
     def get_recrawl_task(self, host_id: str, task_id: str) -> dict:
@@ -735,8 +808,8 @@ class YandexWebmaster(object):
                 "state": "IN_PROGRESS"
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/recrawl/queue/{task_id}'
-        response = self._send_api_request('get', endpoint)
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/recrawl/queue/{task_id}"
+        response = self._send_api_request("get", endpoint)
         return response
 
     def get_recrawl_tasks(
@@ -768,14 +841,14 @@ class YandexWebmaster(object):
                 ]
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/recrawl/queue'
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/recrawl/queue"
         params = {
-            'date_from': date_from.strftime('%Y-%m-%d'),
-            'date_to': date_to.strftime('%Y-%m-%d'),
-            'limit': limit,
-            'offset': offset,
+            "date_from": date_from.strftime("%Y-%m-%d"),
+            "date_to": date_to.strftime("%Y-%m-%d"),
+            "limit": limit,
+            "offset": offset,
         }
-        response = self._send_api_request('get', endpoint, params)
+        response = self._send_api_request("get", endpoint, params)
         return response
 
     def get_recrawl_quota(self, host_id: str) -> dict:
@@ -790,8 +863,8 @@ class YandexWebmaster(object):
                 "quota_remainder": 1
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/recrawl/quota'
-        response = self._send_api_request('get', endpoint)
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/recrawl/quota"
+        response = self._send_api_request("get", endpoint)
         return response
 
     def diagnostic_site(self, host_id: str) -> dict:
@@ -811,8 +884,8 @@ class YandexWebmaster(object):
                 }
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/diagnostics'
-        response = self._send_api_request('get', endpoint)
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/diagnostics"
+        response = self._send_api_request("get", endpoint)
         return response
 
     def get_broken_internal_links_samples(
@@ -839,9 +912,9 @@ class YandexWebmaster(object):
                 ]
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/links/internal/broken/samples'
-        params = {'limit': limit, 'offset': offset, 'indicator': indicator}
-        response = self._send_api_request('get', endpoint, params)
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/links/internal/broken/samples"
+        params = {"limit": limit, "offset": offset, "indicator": indicator}
+        response = self._send_api_request("get", endpoint, params)
         return response
 
     def get_broken_internal_links_history(
@@ -866,12 +939,12 @@ class YandexWebmaster(object):
                 }
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/links/internal/broken/history'
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/links/internal/broken/history"
         params = {
-            'date_from': date_from.strftime('%Y-%m-%d'),
-            'date_to': date_to.strftime('%Y-%m-%d'),
+            "date_from": date_from.strftime("%Y-%m-%d"),
+            "date_to": date_to.strftime("%Y-%m-%d"),
         }
-        response = self._send_api_request('get', endpoint, params)
+        response = self._send_api_request("get", endpoint, params)
         return response
 
     def get_external_links_samples(
@@ -897,12 +970,12 @@ class YandexWebmaster(object):
                 ]
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/links/external/samples'
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/links/external/samples"
         params = {
-            'limit': limit,
-            'offset': offset,
+            "limit": limit,
+            "offset": offset,
         }
-        response = self._send_api_request('get', endpoint, params)
+        response = self._send_api_request("get", endpoint, params)
         return response
 
     def get_external_links_history(self, host_id: str) -> dict:
@@ -923,13 +996,13 @@ class YandexWebmaster(object):
                 }
             }
         """
-        endpoint = f'user/{self.user_id}/hosts/{host_id}/links/external/history'
-        response = self._send_api_request('get', endpoint)
+        endpoint = f"user/{self.user_id}/hosts/{host_id}/links/external/history"
+        response = self._send_api_request("get", endpoint)
         return response
 
     def _init_session(self) -> Session:
         session = Session()
-        session.headers.update({'Authorization': f'OAuth {self.access_token}'})
+        session.headers.update({"Authorization": f"OAuth {self.access_token}"})
         return session
 
     @property

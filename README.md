@@ -85,6 +85,25 @@ date_to = datetime.now()
 result = client.get_single_search_query_history('<host_id>', '<query_id>', date_from, date_to, query_indicator='TOTAL_SHOWS', device_type_indicator='DESKTOP')
 ```
 
+### get list query analytics
+
+- doc - https://yandex.ru/dev/webmaster/doc/dg/reference/host-query-analytics.html
+- params
+  | name | type | default value |
+  | :--------------------: | :--: | :-----------: |
+  | host_id | str | required |
+  | device_type_indicator | str | "ALL" |
+  | text_indicator | str | "URL" |
+  | limit | int | 20 |
+  | offset | int | 0 |
+  | region_ids | Optional[list] | None |
+  | filters | Optional[dict] | None |
+  | sort_by_date | Optional[dict] | None |
+
+```python
+result = client.get_list_query_analytics('<host_id>', "ALL", limit=500, offset=500)
+```
+
 ### get host info
 
 - doc - https://yandex.ru/dev/webmaster/doc/dg/reference/hosts-id.html
@@ -451,3 +470,7 @@ result = client.get_external_links_samples(host_id='<host_id>')
 ```python
 result = client.get_external_links_history(host_id='<host_id>')
 ```
+
+## CHANGELOG
+
+0.0.2 - add get_list_query_analytics method
