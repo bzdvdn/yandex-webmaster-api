@@ -32,7 +32,7 @@ hosts = client.get_hosts()
   | host_id | str | required |
   | date_from | datetime | required |
   | date_to | datetime | required |
-  | query_indicator | str | required |
+  | query_indicator | List[str] | required |
   | order_by | Optional[str] | TOTAL_SHOWS |
   | device_type_indicator | Optional[str] | None |
   | limit | int | 500 |
@@ -42,7 +42,7 @@ hosts = client.get_hosts()
 from datetime import datetime, timedelta
 date_from = datetime.now() - timedelta(days=4)
 date_to = datetime.now()
-result = client.get_popular_search_queries('<host_id>', date_from, date_to, query_indicator='TOTAL_SHOWS')
+result = client.get_popular_search_queries('<host_id>', date_from, date_to, query_indicator=['TOTAL_SHOWS'])
 ```
 
 ### get search query all history
@@ -54,7 +54,7 @@ result = client.get_popular_search_queries('<host_id>', date_from, date_to, quer
   | host_id | str | required |
   | date_from | datetime | required |
   | date_to | datetime | required |
-  | query_indicator | str | required |
+  | query_indicator | List[str] | required |
   | order_by | Optional[str] | TOTAL_SHOWS |
   | device_type_indicator | Optional[str] | None |
 
@@ -62,7 +62,7 @@ result = client.get_popular_search_queries('<host_id>', date_from, date_to, quer
 from datetime import datetime, timedelta
 date_from = datetime.now() - timedelta(days=4)
 date_to = datetime.now()
-result = client.get_search_query_all_history('<host_id>', date_from, date_to, query_indicator='TOTAL_SHOWS', device_type_indicator='DESKTOP')
+result = client.get_search_query_all_history('<host_id>', date_from, date_to, query_indicator=['TOTAL_SHOWS'], device_type_indicator='DESKTOP')
 ```
 
 ### get single search query history
@@ -75,14 +75,14 @@ result = client.get_search_query_all_history('<host_id>', date_from, date_to, qu
   | query_id | str | required |
   | date_from | datetime | required |
   | date_to | datetime | required |
-  | query_indicator | str | required |
+  | query_indicator | List[str] | required |
   | device_type_indicator | Optional[str] | None |
 
 ```python
 from datetime import datetime, timedelta
 date_from = datetime.now() - timedelta(days=4)
 date_to = datetime.now()
-result = client.get_single_search_query_history('<host_id>', '<query_id>', date_from, date_to, query_indicator='TOTAL_SHOWS', device_type_indicator='DESKTOP')
+result = client.get_single_search_query_history('<host_id>', '<query_id>', date_from, date_to, query_indicator=['TOTAL_SHOWS'], device_type_indicator='DESKTOP')
 ```
 
 ### get list query analytics
@@ -473,4 +473,5 @@ result = client.get_external_links_history(host_id='<host_id>')
 
 ## CHANGELOG
 
+0.0.3 - change query_indicator params to list[str]
 0.0.2 - add get_list_query_analytics method

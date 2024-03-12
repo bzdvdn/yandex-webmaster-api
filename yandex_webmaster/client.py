@@ -1,7 +1,9 @@
 from typing import Optional
-from requests import Session
 from datetime import datetime
 from urllib.parse import urlencode
+from typing import List
+
+from requests import Session
 
 from .errors import YandexWebmasterError
 
@@ -23,7 +25,7 @@ class YandexWebmaster(object):
             response = method(url, json=params)
         else:
             if params:
-                url = f"{url}?{urlencode(params)}"
+                url = f"{url}?{urlencode(list(params.items()), doseq=True)}"
             response = method(url)
         if response.status_code == 204:
             return {}
@@ -63,7 +65,7 @@ class YandexWebmaster(object):
         host_id: str,
         date_from: datetime,
         date_to: datetime,
-        query_indicator: str,
+        query_indicator: List[str],
         order_by: str = "TOTAL_SHOWS",
         device_type_indicator: Optional[str] = "ALL",
         limit: int = 500,
@@ -75,7 +77,7 @@ class YandexWebmaster(object):
             host_id (str): site id
             date_from (datetime): date from
             date_to (datetime): date to
-            query_indicator (Optional[str], optional): TOTAL_SHOWS or TOTAL_CLICK OR AVG_SHOW_POSITION or AVG_CLICK_POSITION. Defaults to None.
+            query_indicator (Optional[List[str]], optional): TOTAL_SHOWS or TOTAL_CLICK OR AVG_SHOW_POSITION or AVG_CLICK_POSITION. Defaults to None.
             order_by (str, optional): TOTAL_SHOWS or TOTAL_CLICK. Defaults to 'TOTAL_SHOWS'.
             device_type_indicator (Optional[str], optional): ALL or TABLET or MOBILE or DESKTOP or MOBILE_AND_TABLET. Defaults to ALL.
             limit (int, optional): [description]. Defaults to 500.
@@ -101,7 +103,7 @@ class YandexWebmaster(object):
     def get_search_query_all_history(
         self,
         host_id: str,
-        query_indicator: str,
+        query_indicator: List[str],
         date_from: Optional[datetime] = None,
         date_to: Optional[datetime] = None,
         device_type_indicator: Optional[str] = None,
@@ -112,7 +114,7 @@ class YandexWebmaster(object):
             host_id (str): site- id
             date_from (Optional[datetime], optional): datetime. Defaults to None.
             date_to (Optional[datetime], optional): datetime. Defaults to None.
-            query_indicator (str): TOTAL_SHOWS or TOTAL_CLICKS.
+            query_indicator (List[str]): TOTAL_SHOWS or TOTAL_CLICKS.
             device_type_indicator (Optional[str], optional): ALL or TABLET or MOBILE or DESKTOP or MOBILE_AND_TABLET. Defaults to None.
 
         Returns:
@@ -146,7 +148,7 @@ class YandexWebmaster(object):
         self,
         host_id: str,
         query_id: str,
-        query_indicator: str,
+        query_indicator: List[str],
         date_from: Optional[datetime] = None,
         date_to: Optional[datetime] = None,
         device_type_indicator: Optional[str] = None,

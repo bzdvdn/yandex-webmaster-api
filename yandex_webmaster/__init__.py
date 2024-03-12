@@ -1,4 +1,4 @@
 from .client import YandexWebmaster
 
 __author__ = "bzdvdn"
-__version__ = "0.0.2"
+__version__ = "0.0.3"

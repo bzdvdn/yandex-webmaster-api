@@ -20,7 +20,7 @@ setup(
     author_email="bzdv.dn@gmail.com",
     url="https://github.com/bzdvdn/yandex-webmaster-api",
     license="MIT",
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
 )
